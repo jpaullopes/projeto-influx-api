@@ -35,4 +35,17 @@ def receber_dados():
         ponto = influxdb_client.Point("manitoramento_cip") \
         .tag("local", dados.get("id_sennsor")) \
         .fild("temperature", float(dados.get("temperature"))) \
-        .fild("")
+        .fild("pressure", float(dados.get("pressure"))) \
+        .fild("concentration", float(dados.get("concentration"))) \
+        .time(datetime.datetime.now(datetime.timezone.utc))
+
+        write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=ponto)
+
+        return flask.jsonify({"status" : "sucess"}), 201
+
+    except Exception as e:
+        print(f"Erro ao criar ponto de dados: {e}")
+        return flask.jsonify({"error": "Erro ao processar os dados"}), 500
+    
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
