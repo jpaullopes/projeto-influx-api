@@ -14,4 +14,18 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=admin12345 
       - DOCKER_INFLUXDB_INIT_ORG=minha-org       
       - DOCKER_INFLUXDB_INIT_BUCKET=sensores     
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=meu-token-super-secreto 
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=meu-token-super-secreto
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+volumes:
+  grafana_data:
+    driver: local
