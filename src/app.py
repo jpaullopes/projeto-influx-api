@@ -6,9 +6,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from dotenv import load_dotenv
 import datetime
 
-import influxdb_client.client.write_api
-
-# Carregando variáveis de ambinete do .env
+# Carregando variáveis de ambiente do .env
 load_dotenv()
 
 INFLUX_URL = os.getenv("INFLUX_URL")
@@ -22,7 +20,7 @@ app = flask.Flask(__name__)
 # Cliente de conexão com o InfluxDB
 try: 
     client = influxdb_client.InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN,org=INFLUX_ORG)
-    write_api = influxdb_client.client.write_api(write_options=SYNCHRONOUS)
+    write_api = client.write_api(write_options=SYNCHRONOUS)
 except Exception as e:
     print(f"Erro ao conectar ao InfluxDB: {e}")
 
@@ -33,10 +31,10 @@ def receber_dados():
 
     try:
         ponto = influxdb_client.Point("manitoramento_cip") \
-        .tag("local", dados.get("id_sennsor")) \
-        .fild("temperature", float(dados.get("temperature"))) \
-        .fild("pressure", float(dados.get("pressure"))) \
-        .fild("concentration", float(dados.get("concentration"))) \
+        .tag("local", dados.get("id_sensor")) \
+        .field("temperature", float(dados.get("temperature"))) \
+        .field("pressure", float(dados.get("pressure"))) \
+        .field("concentration", float(dados.get("concentration"))) \
         .time(datetime.datetime.now(datetime.timezone.utc))
 
         write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=ponto)
