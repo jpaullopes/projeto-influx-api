@@ -2,16 +2,19 @@ version: '3.7'
 
 services:
   influxdb:
-    image: influxdb:latest
-    container_name: influxdb_v3_sensores
+    image: influxdb:2.7
+    container_name: influxdb_sensores
     ports:
       - "8086:8086"
     volumes:
-      - ./influxdb_v3_data:/var/lib/influxdb2
+      - ./influxdb_data:/var/lib/influxdb2
     environment:
-      - INFLUXDB_DB=sensores
-      - INFLUXDB_ORG=minha-org
-      - INFLUXDB_ADMIN_TOKEN=meu-token-super-secreto
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin      
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin12345 
+      - DOCKER_INFLUXDB_INIT_ORG=minha-org       
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensores     
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=meu-token-super-secreto
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
