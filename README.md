@@ -1,147 +1,85 @@
-# API de Monitoramento de Estação CIP com InfluxDB e Grafana
+# API de Monitoramento de Sensores com InfluxDB e Grafana
 
-Este projeto implementa uma solução completa para o monitoramento de dados de uma Estação CIP (Clean-in-Place). Consiste numa API RESTful desenvolvida em Python (Flask) que recebe dados de sensores, os processa e armazena numa base de dados de séries temporais (InfluxDB). A visualização dos dados é feita em tempo real através de dashboards no Grafana.
+![Backend](https://img.shields.io/badge/backend-Flask-blue)
+![Database](https://img.shields.io/badge/database-InfluxDB-blueviolet)
+![Visualization](https://img.shields.io/badge/visualization-Grafana-orange)
+![Container](https://img.shields.io/badge/container-Docker-lightgrey)
+![Simulator](https://img.shields.io/badge/simulator-included-success)
 
-## Arquitetura do Projeto
 
-O fluxo de dados segue a seguinte arquitetura:
+Solução enxuta e prática para receber dados de sensores via HTTP, armazenar no InfluxDB e visualizar no Grafana. O projeto serviu também como forma aprendizado sobre InfluxDB e uma contrução de API relacionada à ele e sua conexão com o Grafana.
 
-```
-[Simulador de Sensores] --(JSON via POST)--> [API Python/Flask] --(Line Protocol)--> [InfluxDB] <-- (Flux Query)-- [Grafana]
-```
+## 📝 Descrição
 
-## Tecnologias Utilizadas
+Esta API em Flask expõe um endpoint para receber leituras de sensores (JSON) e persiste os dados no InfluxDB. Um simulador acompanha o projeto para facilitar testes locais, enviando dados periódicos à API.
 
-  - **Backend:** Python 3, Flask
-  - **Base de Dados:** InfluxDB v2
-  - **Visualização:** Grafana
-  - **Orquestração de Contentores:** Docker, Docker Compose
-  - **Comunicação:** REST API (JSON)
+## ✨ Funcionalidades
 
-## Pré-requisitos
+- Recebimento de dados via POST (JSON)
+- Escrita no InfluxDB (bucket `sensores`, org `minha-org`)
+- Visualização via Grafana
+- Simulador de sensores incluso (`src/simulator.py`)
 
-Antes de começar, garanta que você tem as seguintes ferramentas instaladas na sua máquina:
+## 🚀 Tecnologias Utilizadas
 
-  - [Docker](https://www.docker.com/products/docker-desktop/)
-  - [Docker Compose](https://docs.docker.com/compose/install/)
-  - [Python 3.8+](https://www.python.org/downloads/)
+- Python 3.8+, Flask, python-dotenv
+- influxdb-client (InfluxDB 2.7)
+- Docker & Docker Compose
+- Grafana
 
-## Como Executar o Projeto
+## ⚙️ Como Usar
 
-Siga os passos abaixo para colocar toda a stack a funcionar.
-
-**1. Clonar o Repositório**
-
+1) Clone o repositório
 ```bash
-git clone <URL_DO_SEU_REPOSITORIO>
-cd <NOME_DO_SEU_REPOSITORIO>
+git clone https://github.com/jpaullopes/projeto-influx-api.git
+cd projeto-influx-api
 ```
 
-**2. Configurar Variáveis de Ambiente**
-Este projeto usa um ficheiro `.env` para gerir as credenciais. Crie uma cópia do ficheiro de exemplo:
-
-```bash
-# No Windows (use copy)
-copy .env.example .env
-
-# No Linux/macOS
-cp .env.example .env
-```
-
-*O ficheiro `.env.example` já contém os valores padrão que configurámos no `docker-compose.yml`.*
-
-**3. Iniciar os Serviços (InfluxDB e Grafana)**
-Este comando vai iniciar os contentores do InfluxDB e Grafana em background.
-
+2) Suba InfluxDB e Grafana
 ```bash
 docker-compose up -d
 ```
 
-**4. Configurar o Ambiente Python**
-Crie e ative um ambiente virtual para isolar as dependências do projeto.
-
-```bash
-# Criar o ambiente virtual
-python -m venv .venv
-
-# Ativar o ambiente
-# No Windows:
-.\.venv\Scripts\activate
-# No Linux/macOS:
-source .venv/bin/activate
+3) Configure variáveis de ambiente (arquivo `.env` na raiz)
+```env
+INFLUX_URL=http://localhost:8086
+INFLUX_TOKEN=meu-token-super-secreto
+INFLUX_ORG=minha-org
+INFLUX_BUCKET=sensores
 ```
 
-**5. Instalar as Dependências Python**
-Instale todas as bibliotecas necessárias a partir do ficheiro `requirements.txt`.
-
+4) Prepare o ambiente Python e instale dependências
 ```bash
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .\.venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-**6. Executar a API**
-Num terminal com o ambiente virtual ativado, inicie a API Flask.
-
+5) Inicie a API
 ```bash
-python app.py
+python src/app.py
 ```
 
-*A API estará a ouvir por pedidos na porta 5000.*
-
-**7. Executar o Simulador de Sensores**
-Abra **um novo terminal**, ative o ambiente virtual novamente e inicie o script que simula o envio de dados.
-
+6) (Opcional) Execute o simulador de sensores
 ```bash
-# Ative o ambiente virtual neste novo terminal
-source .venv/bin/activate
-
-# Inicie o simulador
-python simulator.py
+python src/simulator.py
 ```
 
-*Você começará a ver logs de dados a serem enviados a cada 5 segundos.*
+## 🌐 Acesso aos Serviços
 
-## Estrutura dos Dados
+- API: http://localhost:5000/api/dados-sensor
+- InfluxDB UI: http://localhost:8086 (admin / admin12345)
+- Grafana UI: http://localhost:3000 (admin / admin)
 
-### Endpoint da API
+## ❗ Dicas e Troubleshooting
 
-  - **URL:** `/api/dados-sensor`
-  - **Método:** `POST`
-  - **Formato do Corpo (JSON):**
-    ```json
-    {
-        "id_sensor": "nome-do-sensor",
-        "temperature": 25.5,
-        "pressure": 1.2,
-        "concentration": 7.1
-    }
-    ```
+- Certifique-se de que o token no `.env` coincide com `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN` do `docker-compose.yml`.
+- Se as portas 5000, 3000 ou 8086 estiverem ocupadas, ajuste mapeamentos em `docker-compose.yml`.
 
-### Schema no InfluxDB
 
-Os dados JSON são mapeados para o InfluxDB da seguinte forma:
+## 📄 Licença
 
-  - **Bucket:** `sensores`
-  - **Measurement:** `manitoramento_cip`
-  - **Tags:**
-      - `local`: (vem de `id_sensor`)
-  - **Fields:**
-      - `temperature`: (float)
-      - `pressure`: (float)
-      - `concentration`: (float)
+Este projeto está licenciado sob os termos da licença MIT. Veja o arquivo [LICENSE](./LICENSE) para mais detalhes.
 
-## Aceder aos Serviços
-
-Depois de executar todos os passos, os serviços estarão disponíveis nos seguintes endereços:
-
-  - **InfluxDB UI:** [http://localhost:8086](https://www.google.com/search?q=http://localhost:8086)
-
-      - **Utilizador:** `admin`
-      - **Palavra-passe:** `admin12345`
-
-  - **Grafana UI:** [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000)
-
-      - **Utilizador:** `admin`
-      - **Palavra-passe:** `admin`
-
-  - **API Endpoint:** `http://localhost:5000/api/dados-sensor`
 
