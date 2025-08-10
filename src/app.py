@@ -19,16 +19,18 @@ app = flask.Flask(__name__)
 
 # Cliente de conexão com o InfluxDB
 try: 
-    client = influxdb_client.InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN,org=INFLUX_ORG)
-    write_api = client.write_api(write_options=SYNCHRONOUS)
+    client = influxdb_client.InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+    write_api = client.write_api(write_options=SYNCHRONOUS) 
 except Exception as e:
     print(f"Erro ao conectar ao InfluxDB: {e}")
 
+# Rota para receber dados do sensor
 @app.route('/api/dados-sensor', methods=['POST'])
 def receber_dados():
     dados = flask.request.get_json()
     print(f"Dados recebido: {dados}")
 
+    # Criando ponto de dados para InfluxDB
     try:
         ponto = influxdb_client.Point("manitoramento_cip") \
         .tag("local", dados.get("id_sensor")) \
@@ -37,6 +39,7 @@ def receber_dados():
         .field("concentration", float(dados.get("concentration"))) \
         .time(datetime.datetime.now(datetime.timezone.utc))
 
+        # Escrevendo ponto no InfluxDB
         write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=ponto)
 
         return flask.jsonify({"status" : "sucess"}), 201
@@ -44,6 +47,7 @@ def receber_dados():
     except Exception as e:
         print(f"Erro ao criar ponto de dados: {e}")
         return flask.jsonify({"error": "Erro ao processar os dados"}), 500
-    
+
+# Rodando a aplicação Flask 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
