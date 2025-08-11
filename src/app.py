@@ -2,6 +2,7 @@ import os
 import flask
 import influxdb_client
 import influxdb_client.client
+from influxdb_client_3 import InfluxDBClient3, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from dotenv import load_dotenv
 import datetime
@@ -11,15 +12,14 @@ load_dotenv()
 
 INFLUX_URL = os.getenv("INFLUX_URL")
 INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
-INFLUX_ORG = os.getenv("INFLUX_ORG")
-INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
+INFLUX_DATABASE = os.getenv("INFLUX_DATABASE")
 
 # Iniciando a aplicação Flask
 app = flask.Flask(__name__)
 
 # Cliente de conexão com o InfluxDB
 try: 
-    client = influxdb_client.InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+    client = InfluxDBClient3(host=INFLUX_URL, token=INFLUX_TOKEN, database=INFLUX_DATABASE)
     write_api = client.write_api(write_options=SYNCHRONOUS) 
 except Exception as e:
     print(f"Erro ao conectar ao InfluxDB: {e}")
@@ -42,7 +42,7 @@ def receber_dados():
         .time(datetime.datetime.now(datetime.timezone.utc))
 
         # Escrevendo ponto no InfluxDB
-        write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=ponto)
+        client.write(record=ponto)
 
         return flask.jsonify({"status" : "sucess"}), 201
 

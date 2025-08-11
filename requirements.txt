@@ -1,4 +1,4 @@
 flask
-influxdb-client
+influxdb3-python
 requests
 python-dotenv
