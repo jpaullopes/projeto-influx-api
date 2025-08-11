@@ -6,6 +6,13 @@ import random
 # O endereço da API
 API_URL = "http://localhost:5000/api/dados-sensor"
 
+# Função que com base na temperatura informa se o CIP está ativo ou inativo
+def status_cip(temperatura):
+    if temperatura > 20.0:
+        return "true"
+    else:
+        return "false"
+
 print(f"Enviando dados para: {API_URL}")
 cip_id = 1 
 count_cip = 0
@@ -14,7 +21,7 @@ while True:
         sensor_id = "estacao_cip"
         
         # Gera dados aleatórios
-        temperatura = round(random.uniform(18.0, 26.0), 2)
+        temperatura = round(random.uniform(20.0, 26.0), 2)
         pressao = round(random.uniform(900.0, 1100.0), 2)
         concentracao = round(random.uniform(0.0, 100.0), 2)
 
@@ -22,6 +29,7 @@ while True:
         dados_sensor = {
             "id_sensor": sensor_id,
             "cip_id": str(cip_id),
+            "status_cip": status_cip(temperatura),
             "temperature": temperatura,
             "pressure": pressao,
             "concentration": concentracao

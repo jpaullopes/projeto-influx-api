@@ -35,6 +35,7 @@ def receber_dados():
         ponto = influxdb_client.Point("manitoramento_cip") \
         .tag("local", dados.get("id_sensor")) \
         .tag("cip_id", dados.get("cip_id")) \
+        .tag("status_cip", dados.get("status_cip")) \
         .field("temperature", float(dados.get("temperature"))) \
         .field("pressure", float(dados.get("pressure"))) \
         .field("concentration", float(dados.get("concentration"))) \
