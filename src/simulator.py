@@ -7,7 +7,8 @@ import random
 API_URL = "http://localhost:5000/api/dados-sensor"
 
 print(f"Enviando dados para: {API_URL}")
-
+cip_id = 1 
+count_cip = 0
 while True:
     try:
         sensor_id = "estacao_cip"
@@ -20,6 +21,7 @@ while True:
         # Monta o JSON com os dados do sensor
         dados_sensor = {
             "id_sensor": sensor_id,
+            "cip_id": str(cip_id),
             "temperature": temperatura,
             "pressure": pressao,
             "concentration": concentracao
@@ -36,3 +38,8 @@ while True:
         print(f"Ocorreu um erro inesperado: {e}")
 
     time.sleep(5)
+    count_cip += 1
+    if count_cip >= 120:
+        count_cip = 0
+        cip_id += 1
+        time.sleep(300)
