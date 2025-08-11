@@ -1,30 +1,21 @@
 version: '3.8'
 services:
   influxdb3-core:
-    image: influxdb/influxdb3-core:latest
+    image: influxdb:3.3-core
     container_name: influxdb3-core
     ports:
       - "8181:8181"
     volumes:
       - influxdb3_data:/var/lib/influxdb3
     environment:
-      - INFLUXDB_DATABASE=sensores
-      - INFLUXDB_HOST=0.0.0.0
-      - INFLUXDB_PORT=8181
-      - INFLUXDB_TOKEN=meu-token-super-secreto
+      - INFLUXDB3_DATA_DIR=/home/influxdb3/.influxdb3
+      - INFLUXDB_IOX_DB_DIR=/var/lib/influxdb3
+      - LOG_FILTER=info
     command: >
-      sh -c "influxdb3 serve 
-             --host 0.0.0.0 
-             --port 8181 
-             --object-store file 
-             --data-dir /var/lib/influxdb3 
-             --database-directory /var/lib/influxdb3/db"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      influxdb3 serve 
+      --object-store file
+      --data-dir /var/lib/influxdb3
+      --node-id node1
 
   grafana:
     image: grafana/grafana:latest
@@ -36,9 +27,6 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      influxdb3-core:
-        condition: service_healthy
 
 volumes:
   influxdb3_data:
