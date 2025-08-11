@@ -17,9 +17,9 @@ app = flask.Flask(__name__)
 # Cliente de conexão com o InfluxDB v3
 try: 
     client = InfluxDBClient3(host=INFLUX_HOST, token=INFLUX_TOKEN, database=INFLUX_DATABASE)
-    print(f"✅ Conectado ao InfluxDB v3 em {INFLUX_HOST}")
+    print(f"Conectado ao InfluxDB v3 em {INFLUX_HOST}")
 except Exception as e:
-    print(f"❌ Erro ao conectar ao InfluxDB: {e}")
+    print(f"Erro ao conectar ao InfluxDB: {e}")
     client = None
 
 # Rota para receber dados do sensor
@@ -45,7 +45,7 @@ def receber_dados():
 
         # Escrevendo ponto no InfluxDB v3
         client.write(record=ponto)
-        print(f"✅ Dados escritos com sucesso: {dados}")
+        print(f"Dados escritos: {dados}")
 
         return flask.jsonify({"status": "success"}), 201
 

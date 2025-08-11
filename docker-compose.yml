@@ -11,6 +11,7 @@ services:
       - INFLUXDB3_DATA_DIR=/home/influxdb3/.influxdb3
       - INFLUXDB_IOX_DB_DIR=/var/lib/influxdb3
       - LOG_FILTER=info
+      - INFLUXDB_TOKEN=meu-token-super-secreto
     command: >
       influxdb3 serve 
       --object-store file
