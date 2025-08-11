@@ -11,6 +11,7 @@ services:
       - INFLUXDB_DATABASE=sensores
       - INFLUXDB_HOST=0.0.0.0
       - INFLUXDB_PORT=8181
+      - INFLUXDB_TOKEN=meu-token-super-secreto
     command: >
       sh -c "influxdb3 serve 
              --host 0.0.0.0 

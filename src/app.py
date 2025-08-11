@@ -1,28 +1,26 @@
 import os
 import flask
-import influxdb_client
-import influxdb_client.client
 from influxdb_client_3 import InfluxDBClient3, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
 from dotenv import load_dotenv
 import datetime
 
 # Carregando variáveis de ambiente do .env
 load_dotenv()
 
-INFLUX_URL = os.getenv("INFLUX_URL")
+INFLUX_HOST = os.getenv("INFLUX_HOST", "http://localhost:8181")
 INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
-INFLUX_DATABASE = os.getenv("INFLUX_DATABASE")
+INFLUX_DATABASE = os.getenv("INFLUX_DATABASE", "sensores")
 
 # Iniciando a aplicação Flask
 app = flask.Flask(__name__)
 
-# Cliente de conexão com o InfluxDB
+# Cliente de conexão com o InfluxDB v3
 try: 
-    client = InfluxDBClient3(host=INFLUX_URL, token=INFLUX_TOKEN, database=INFLUX_DATABASE)
-    write_api = client.write_api(write_options=SYNCHRONOUS) 
+    client = InfluxDBClient3(host=INFLUX_HOST, token=INFLUX_TOKEN, database=INFLUX_DATABASE)
+    print(f"✅ Conectado ao InfluxDB v3 em {INFLUX_HOST}")
 except Exception as e:
-    print(f"Erro ao conectar ao InfluxDB: {e}")
+    print(f"❌ Erro ao conectar ao InfluxDB: {e}")
+    client = None
 
 # Rota para receber dados do sensor
 @app.route('/api/dados-sensor', methods=['POST'])
@@ -30,21 +28,26 @@ def receber_dados():
     dados = flask.request.get_json()
     print(f"Dados recebido: {dados}")
 
-    # Criando ponto de dados para InfluxDB
+    # Criando ponto de dados para InfluxDB v3
     try:
-        ponto = influxdb_client.Point("manitoramento_cip") \
-        .tag("local", dados.get("id_sensor")) \
-        .tag("cip_id", dados.get("cip_id")) \
-        .tag("status_cip", dados.get("status_cip")) \
-        .field("temperature", float(dados.get("temperature"))) \
-        .field("pressure", float(dados.get("pressure"))) \
-        .field("concentration", float(dados.get("concentration"))) \
-        .time(datetime.datetime.now(datetime.timezone.utc))
+        if not client:
+            return flask.jsonify({"error": "InfluxDB não conectado"}), 500
+            
+        # Para InfluxDB v3, usar Point da biblioteca influxdb_client_3
+        ponto = Point("monitoramento_cip") \
+            .tag("local", dados.get("id_sensor")) \
+            .tag("cip_id", dados.get("cip_id", "default")) \
+            .tag("status_cip", dados.get("status_cip", "active")) \
+            .field("temperature", float(dados.get("temperature"))) \
+            .field("pressure", float(dados.get("pressure"))) \
+            .field("concentration", float(dados.get("concentration"))) \
+            .time(datetime.datetime.now(datetime.timezone.utc))
 
-        # Escrevendo ponto no InfluxDB
+        # Escrevendo ponto no InfluxDB v3
         client.write(record=ponto)
+        print(f"✅ Dados escritos com sucesso: {dados}")
 
-        return flask.jsonify({"status" : "sucess"}), 201
+        return flask.jsonify({"status": "success"}), 201
 
     except Exception as e:
         print(f"Erro ao criar ponto de dados: {e}")
