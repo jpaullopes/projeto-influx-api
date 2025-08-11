@@ -4,14 +4,14 @@ services:
     image: influxdb:3.3-core
     container_name: influxdb3-core
     ports:
-      - "8181:8181"
+      - "8181:8181"  
+      - "32010:32010"  
     volumes:
       - influxdb3_data:/var/lib/influxdb3
     environment:
       - INFLUXDB3_DATA_DIR=/home/influxdb3/.influxdb3
       - INFLUXDB_IOX_DB_DIR=/var/lib/influxdb3
       - LOG_FILTER=info
-      - INFLUXDB_TOKEN=meu-token-super-secreto
     command: >
       influxdb3 serve 
       --object-store file
@@ -25,9 +25,13 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION=false
+    depends_on:
+      - influxdb3-core
 
 volumes:
   influxdb3_data:
