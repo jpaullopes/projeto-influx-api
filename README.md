@@ -43,8 +43,8 @@ docker-compose up -d
 3) Configure variáveis de ambiente (arquivo `.env` na raiz)
 ```env
 INFLUX_HOST=http://localhost:8181
-INFLUX_TOKEN=apiv3_C4pLMDUJx4VweChD7-VRn5aIWZoDQnPSxxZXsCkEUyLBCrxf3P9OJBCBr9fO4FbDtiN2sojhLJxxguVkEAl6xA
-INFLUX_DATABASE=sensores
+INFLUX_TOKEN=meu-token-super-secreto
+INFLUX_DATABASE=seu-database
 ```
 
 4) Prepare o ambiente Python e instale dependências
