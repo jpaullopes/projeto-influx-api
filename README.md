@@ -1,7 +1,7 @@
 # API de Monitoramento de Sensores com InfluxDB e Grafana
 
 ![Backend](https://img.shields.io/badge/backend-Flask-blue)
-![Database](https://img.shields.io/badge/database-InfluxDB-blueviolet)
+![Database](https://img.shields.io/badge/database-InfluxDB%20v3-blueviolet)
 ![Visualization](https://img.shields.io/badge/visualization-Grafana-orange)
 ![Container](https://img.shields.io/badge/container-Docker-lightgrey)
 ![Simulator](https://img.shields.io/badge/simulator-included-success)
@@ -23,7 +23,7 @@ Esta API em Flask expõe um endpoint para receber leituras de sensores (JSON) e 
 ## 🚀 Tecnologias Utilizadas
 
 - Python 3.8+, Flask, python-dotenv
-- influxdb-client (InfluxDB 2.7)
+- influxdb3-python (InfluxDB v3.3-core)
 - Docker & Docker Compose
 - Grafana
 
@@ -42,10 +42,9 @@ docker-compose up -d
 
 3) Configure variáveis de ambiente (arquivo `.env` na raiz)
 ```env
-INFLUX_URL=http://localhost:8086
-INFLUX_TOKEN=meu-token-super-secreto
-INFLUX_ORG=minha-org
-INFLUX_BUCKET=sensores
+INFLUX_HOST=http://localhost:8181
+INFLUX_TOKEN=apiv3_C4pLMDUJx4VweChD7-VRn5aIWZoDQnPSxxZXsCkEUyLBCrxf3P9OJBCBr9fO4FbDtiN2sojhLJxxguVkEAl6xA
+INFLUX_DATABASE=sensores
 ```
 
 4) Prepare o ambiente Python e instale dependências
@@ -69,13 +68,14 @@ python src/simulator.py
 ## 🌐 Acesso aos Serviços
 
 - API: http://localhost:5000/api/dados-sensor
-- InfluxDB UI: http://localhost:8086 (admin / admin12345)
+- InfluxDB v3: http://localhost:8181
 - Grafana UI: http://localhost:3000 (admin / admin)
 
 ## ❗ Dicas e Troubleshooting
 
-- Certifique-se de que o token no `.env` coincide com `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN` do `docker-compose.yml`.
-- Se as portas 5000, 3000 ou 8086 estiverem ocupadas, ajuste mapeamentos em `docker-compose.yml`.
+- InfluxDB v3 não possui interface web (use CLI ou Grafana para consultas).
+- O Grafana já vem com data source InfluxDB pré-configurado.
+- Se as portas 5000, 3000 ou 8181 estiverem ocupadas, ajuste mapeamentos em `docker-compose.yml`.
 
 
 ## 📄 Licença
