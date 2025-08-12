@@ -34,7 +34,7 @@ def receber_dados():
             return flask.jsonify({"error": "InfluxDB não conectado"}), 500
             
         # Para InfluxDB v3, usar Point da biblioteca influxdb_client_3
-        ponto = Point("monitoramento_cip") \
+        ponto = Point("manitoramento_cip") \
             .tag("local", dados.get("id_sensor")) \
             .tag("cip_id", dados.get("cip_id", "default")) \
             .tag("status_cip", dados.get("status_cip", "active")) \

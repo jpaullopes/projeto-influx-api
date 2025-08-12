@@ -21,9 +21,9 @@ while True:
         sensor_id = "estacao_cip"
         
         # Gera dados aleatórios
-        temperatura = round(random.uniform(20.0, 26.0), 2)
-        pressao = round(random.uniform(900.0, 1100.0), 2)
-        concentracao = round(random.uniform(0.0, 100.0), 2)
+        temperatura = round(random.uniform(70.0, 100.0), 2)
+        pressao = round(random.uniform(1.5, 3.0), 2)
+        concentracao = round(random.uniform(0.4, 2.5), 2)
 
         # Monta o JSON com os dados do sensor
         dados_sensor = {
