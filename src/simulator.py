@@ -6,7 +6,7 @@ import math
 from datetime import datetime, timedelta
 
 # O endereço da API
-API_URL = "http://localhost:5000/api/dados-sensor"
+API_URL = "http://localhost:8000/api/dados-sensor"
 
 # Definição das fases do CIP e suas características
 class CIPPhases:
@@ -172,6 +172,15 @@ while True:
     try:
         sensor_id = "estacao_cip"
         
+        # Verifica se deve avançar para a próxima fase
+        if cip_simulator.should_advance_phase():
+            old_cip_id = cip_simulator.cip_id
+            cip_simulator.advance_phase()
+            
+            # Se mudou de CIP, marca o tempo para controle de status
+            if cip_simulator.cip_id != old_cip_id:
+                tempo_mudanca_cip = datetime.now()
+        
         # Verifica se o CIP mudou recentemente (nos últimos 3 minutos)
         cip_mudou_recentemente = False
         if tempo_mudanca_cip:
@@ -179,17 +188,14 @@ while True:
             tempo_espera = tempo_mudanca_cip + timedelta(minutes=TEMPO_ESPERA_MINUTOS)
             cip_mudou_recentemente = tempo_atual < tempo_espera
         
-        # Gera dados aleatórios
-        temperatura = round(random.uniform(70.0, 100.0), 2)
-        pressao = round(random.uniform(1.5, 3.0), 2)
-        concentracao = round(random.uniform(0.4, 2.5), 2)
+        # Gera dados realistas baseado na fase atual do CIP
+        temperatura, pressao, concentracao = cip_simulator.get_sensor_data()
 
-        # Monta o JSON com os dados do sensor
+        # Monta o JSON com os dados do sensor (mantém formato original)
         dados_sensor = {
             "id_sensor": sensor_id,
-            "cip_id": str(cip_id),
-            "status_cip": status_cip(cip_mudou_recentemente)
-            ,
+            "cip_id": str(cip_simulator.cip_id),
+            "status_cip": status_cip(cip_mudou_recentemente),
             "temperature": temperatura,
             "pressure": pressao,
             "concentration": concentracao
@@ -197,7 +203,12 @@ while True:
         
         # Envia os dados para a API usando uma requisição POST
         response = requests.post(API_URL, json=dados_sensor)
-        print(f"Sensor: {sensor_id}, Dados: {dados_sensor}, Status: {response.status_code}")
+        
+        # Mostra informações mais detalhadas
+        current_phase = cip_simulator.get_current_phase()
+        progress = cip_simulator.get_phase_progress()
+        print(f"CIP {cip_simulator.cip_id} | Fase: {current_phase} ({progress:.1%}) | "
+              f"T:{temperatura}°C P:{pressao}bar C:{concentracao}% | Status: {response.status_code}")
         
     except requests.exceptions.ConnectionError as e:
         print(f"Erro de conexão: A API está no ar? Detalhe: {e}")
@@ -206,11 +217,3 @@ while True:
         print(f"Ocorreu um erro inesperado: {e}")
 
     time.sleep(5)
-    count_cip += 1
-    
-    # Quando atinge 120 ciclos (10 minutos), muda o CIP ID
-    if count_cip >= 120:
-        count_cip = 0
-        cip_id += 1
-        tempo_mudanca_cip = datetime.now()  # Marca o momento da mudança
-        print(f"CIP mudou para ID {cip_id}. Status será 'false' pelos próximos {TEMPO_ESPERA_MINUTOS} minutos.")
