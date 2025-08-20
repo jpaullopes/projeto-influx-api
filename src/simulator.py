@@ -6,7 +6,7 @@ import math
 from datetime import datetime, timedelta
 
 # O endereço da API
-API_URL = "http://localhost:8000/api/dados-sensor"
+API_URL = "http://localhost:8000/api/v1/temperature_reading"
 
 # Definição das fases do CIP e suas características
 class CIPPhases:
@@ -201,12 +201,21 @@ while True:
             "concentration": concentracao
         }
         
+        # Headers necessários para a API
+        headers = {
+            "X-API-Key": "api_key",
+            "Content-Type": "application/json"
+        }
+        
         # Envia os dados para a API usando uma requisição POST
-        response = requests.post(API_URL, json=dados_sensor)
+        response = requests.post(API_URL, json=dados_sensor, headers=headers)
         
         # Mostra informações mais detalhadas
         current_phase = cip_simulator.get_current_phase()
         progress = cip_simulator.get_phase_progress()
+        print(response.headers)
+        print(response.content)
+        print(response.text)
         print(f"CIP {cip_simulator.cip_id} | Fase: {current_phase} ({progress:.1%}) | "
               f"T:{temperatura}°C P:{pressao}bar C:{concentracao}% | Status: {response.status_code}")
         
